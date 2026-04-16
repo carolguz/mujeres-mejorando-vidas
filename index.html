@@ -265,7 +265,7 @@
       <div class="section-line"></div>
       <p style="color:var(--gris-texto);margin-bottom:2rem;line-height:1.7;">
         Nuestra organización cuenta con un equipo multidisciplinario comprometido con la misión institucional.
-        A continuación se presenta la estructura organizacional de <strong>Mujeres Mejorando Vidas</strong>.
+        A continuación se presenta la estructura organizacional de <strong>Mejorando Vidas ONG</strong>.
       </p>
       <img src="organigrama.webp" alt="Organigrama Mujeres Mejorando Vidas" class="org-img" loading="lazy"
            onerror="this.src='organigrama.png'"/>
@@ -287,7 +287,7 @@
       <div class="section-line"></div>
       <div class="trans-intro">
         <strong>Artículo 10 – Ley de Acceso a la Información Pública de Guatemala.</strong><br/>
-        Como sujeto obligado, <em>Mujeres Mejorando Vidas</em> pone a disposición de cualquier interesado la siguiente información pública de oficio, de manera actualizada y disponible en todo momento.
+        Como sujeto obligado, <em>Mejorando Vidas ONG</em> pone a disposición de cualquier interesado la siguiente información pública de oficio, de manera actualizada y disponible en todo momento.
       </div>
       <div class="trans-grid" id="transparencia-grid">
 
@@ -838,12 +838,24 @@
     msg.textContent = '';
 
     try {
+      // Enviar documento al solicitante
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         to_name:       nombre,
         to_email:      correo,
         doc_titulo:    titulo,
         doc_url:       url,
-        org_nombre:    'Mujeres Mejorando Vidas ONG',
+        org_nombre:    'Mejorando Vidas ONG',
+      });
+      // Notificar a la ONG quién descargó el documento
+      await emailjs.send('service_8tf10fh', 'template_mkonsqd', {
+        to_email:        'informacionpublicamejorandovidasong@gmail.com',
+        don_tipo:        'Solicitud de documento público',
+        don_nombre:      nombre,
+        don_telefono:    'No proporcionado',
+        don_correo:      correo,
+        don_institucion: 'N/A',
+        don_monto:       'N/A',
+        don_mensaje:     `Documento solicitado: ${titulo}`,
       });
       msg.style.color = 'green';
       msg.textContent = '✅ ¡Enviado! Revisa tu correo.';
@@ -938,7 +950,7 @@
 
     try {
       await emailjs.send('service_8tf10fh', 'template_mkonsqd', {
-        to_email:       'asocmejorandovidas@gmail.com',
+        to_email:       'finanzasmejorandovidas@gmail.com',
         don_tipo:       tipo,
         don_nombre:     nombre,
         don_telefono:   telefono,
