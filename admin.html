@@ -595,11 +595,16 @@
 
       // 2. Extraer el path y borrar del Storage (maneja URLs con caracteres especiales)
       const path = extraerPath(doc.archivo_url, 'Documentos');
+      console.log('URL:', doc.archivo_url);
+      console.log('PATH:', path);
       if (path) {
         const { error: storageError } = await sb.storage.from('Documentos').remove([path]);
+        console.log('Storage:', storageError ? 'ERROR: ' + storageError.message : 'OK');
         if (storageError) {
           console.warn('Advertencia al borrar PDF del storage:', storageError.message);
         }
+      } else {
+        console.error('PATH es null - revisar URL o nombre del bucket');
       }
 
       // 3. Borrar registro de la base de datos
