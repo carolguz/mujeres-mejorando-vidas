@@ -435,10 +435,14 @@
       if (fotos.length === 0 && noticia.imagen_url) fotos = [noticia.imagen_url];
 
       for (const url of fotos) {
-        // Extraer solo el nombre del archivo limpio sin parámetros
-        const nombre = decodeURIComponent(url.split('/').pop().split('?')[0]);
-        const { error } = await sb.storage.from('Noticias').remove([nombre]);
-        if (error) console.error('Error borrando foto:', nombre, error);
+        // Extraer el nombre del archivo desde la URL de Supabase
+        // La URL tiene formato: .../storage/v1/object/public/Noticias/NOMBRE_ARCHIVO
+        const partes = url.split('/Noticias/');
+        if (partes.length > 1) {
+          const nombre = decodeURIComponent(partes[1].split('?')[0]);
+          const { error } = await sb.storage.from('Noticias').remove([nombre]);
+          if (error) console.error('Error borrando foto:', nombre, error);
+        }
       }
     }
 
@@ -547,10 +551,13 @@
 
   async function borrarDocumento(id, url) {
     if (!confirm('¿Seguro que quieres borrar este documento?')) return;
-    // Extraer nombre limpio sin parámetros extra
-    const nombre = decodeURIComponent(url.split('/').pop().split('?')[0]);
-    const { error } = await sb.storage.from('Documentos').remove([nombre]);
-    if (error) console.error('Error borrando documento:', nombre, error);
+    // Extraer nombre desde URL de Supabase: .../Documentos/NOMBRE_ARCHIVO
+    const partes = url.split('/Documentos/');
+    if (partes.length > 1) {
+      const nombre = decodeURIComponent(partes[1].split('?')[0]);
+      const { error } = await sb.storage.from('Documentos').remove([nombre]);
+      if (error) console.error('Error borrando documento:', nombre, error);
+    }
     await sb.from('Documentos').delete().eq('id', id);
     cargarDocumentos();
   }
