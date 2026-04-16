@@ -3,10 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Mujeres Mejorando Vidas Zaragoza Heredia ONG — Organización social no lucrativa liderada por mujeres, trabajando por el empoderamiento y los derechos humanos en Guatemala."/>
+  <meta name="keywords" content="ONG Guatemala, mujeres, empoderamiento, derechos humanos, Zaragoza, Chimaltenango, transparencia"/>
+  <meta name="author" content="Mujeres Mejorando Vidas ONG"/>
+  <meta property="og:title" content="Mujeres Mejorando Vidas Zaragoza Heredia ONG"/>
+  <meta property="og:description" content="Organización social no lucrativa liderada por mujeres, trabajando por el empoderamiento y los derechos humanos en Guatemala."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://carolguz.github.io/mujeres-mejorando-vidas/"/>
   <title>Mejorando Vidas ONG</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
   <style>
     :root {
       --rojo: #c0392b;
@@ -35,8 +43,9 @@
     .nav-logo { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; flex-shrink: 0; }
     .nav-logo-text { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--amarillo); line-height: 1.2; white-space: nowrap; }
     .nav-links { display: flex; gap: 1rem; list-style: none; flex-wrap: nowrap; align-items: center; flex-shrink: 1; }
-    .nav-links a { color: var(--blanco); text-decoration: none; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.03em; transition: color 0.2s; cursor: pointer; white-space: nowrap; }
-    .nav-links a:hover, .nav-links a.activo { color: var(--amarillo); }
+    .nav-links a, .nav-links button { color: var(--blanco); text-decoration: none; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.03em; transition: color 0.2s; cursor: pointer; white-space: nowrap; background: none; border: none; font-family: 'Nunito', sans-serif; padding: 0; }
+    .nav-links a:hover, .nav-links a.activo,
+    .nav-links button:hover, .nav-links button.activo { color: var(--amarillo); }
 
     .hero {
       min-height: 100vh; display: flex; align-items: center; justify-content: center;
@@ -204,18 +213,19 @@
     <span class="nav-logo-text">Mejorando Vidas ONG</span>
   </a>
   <ul class="nav-links">
-    <li><a onclick="mostrarSeccion(null)">Inicio</a></li>
-    <li><a onclick="mostrarSeccion('quienes')" id="nav-quienes">Quiénes Somos</a></li>
-    <li><a onclick="mostrarSeccion('organigrama')" id="nav-organigrama">Organigrama</a></li>
-    <li><a onclick="mostrarSeccion('transparencia')" id="nav-transparencia">Transparencia</a></li>
-    <li><a onclick="mostrarSeccion('noticias')" id="nav-noticias">Noticias</a></li>
-    <li><a onclick="mostrarSeccion('contacto')" id="nav-contacto">Contacto</a></li>
-    <li><a onclick="mostrarSeccion('donaciones')" id="nav-donaciones">💛 Apóyanos</a></li>
-    <li><a onclick="mostrarSeccion('visitas')" id="nav-visitas">Visitas</a></li>
+    <li><button onclick="mostrarSeccion(null)">Inicio</button></li>
+    <li><button onclick="mostrarSeccion('quienes')" id="nav-quienes">Quiénes Somos</button></li>
+    <li><button onclick="mostrarSeccion('organigrama')" id="nav-organigrama">Organigrama</button></li>
+    <li><button onclick="mostrarSeccion('transparencia')" id="nav-transparencia">Transparencia</button></li>
+    <li><button onclick="mostrarSeccion('noticias')" id="nav-noticias">Noticias</button></li>
+    <li><button onclick="mostrarSeccion('contacto')" id="nav-contacto">Contacto</button></li>
+    <li><button onclick="mostrarSeccion('donaciones')" id="nav-donaciones">💛 Apóyanos</button></li>
+    <li><button onclick="mostrarSeccion('visitas')" id="nav-visitas">Visitas</button></li>
   </ul>
 </nav>
 
 <!-- ═══ HERO ═══ -->
+<main>
 <section class="hero" id="inicio">
   <div class="hero-inner">
     <img src="logo.webp" alt="Logo Mujeres Mejorando Vidas" class="hero-logo" fetchpriority="high" onerror="this.src='logo.png'"/>
@@ -592,6 +602,8 @@
   </section>
 </div>
 
+</main>
+
 <!-- ═══ FOOTER ═══ -->
 <footer>
   <p class="footer-lema">Forjando Mejores Destinos</p>
@@ -618,7 +630,7 @@
   function mostrarSeccion(id) {
     const hero = document.getElementById('inicio');
     document.querySelectorAll('.seccion-dinamica').forEach(s => s.classList.remove('visible'));
-    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('activo'));
+    document.querySelectorAll('.nav-links a, .nav-links button').forEach(a => a.classList.remove('activo'));
 
     if (id) {
       hero.classList.add('oculto');
