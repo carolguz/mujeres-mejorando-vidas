@@ -425,25 +425,23 @@
   async function borrarNoticia(id) {
     if (!confirm('¿Seguro que quieres borrar esta noticia? También se eliminarán todas sus fotos.')) return;
 
-    // Buscar la noticia para obtener sus fotos
     const { data: noticia } = await sb.from('Noticias').select('imagen_url, imagenes_urls').eq('id', id).single();
 
     if (noticia) {
-      // Recopilar todas las URLs de fotos a borrar
       let fotos = [];
       if (noticia.imagenes_urls) {
         try { fotos = JSON.parse(noticia.imagenes_urls); } catch(e) {}
       }
       if (fotos.length === 0 && noticia.imagen_url) fotos = [noticia.imagen_url];
 
-      // Borrar cada foto del Storage
       for (const url of fotos) {
-        const nombre = url.split('/').pop();
-        await sb.storage.from('Noticias').remove([nombre]);
+        // Extraer solo el nombre del archivo limpio sin parámetros
+        const nombre = decodeURIComponent(url.split('/').pop().split('?')[0]);
+        const { error } = await sb.storage.from('Noticias').remove([nombre]);
+        if (error) console.error('Error borrando foto:', nombre, error);
       }
     }
 
-    // Borrar la noticia de la base de datos
     await sb.from('Noticias').delete().eq('id', id);
     cargarNoticias();
   }
@@ -549,8 +547,10 @@
 
   async function borrarDocumento(id, url) {
     if (!confirm('¿Seguro que quieres borrar este documento?')) return;
-    const nombre = url.split('/').pop();
-    await sb.storage.from('Documentos').remove([nombre]);
+    // Extraer nombre limpio sin parámetros extra
+    const nombre = decodeURIComponent(url.split('/').pop().split('?')[0]);
+    const { error } = await sb.storage.from('Documentos').remove([nombre]);
+    if (error) console.error('Error borrando documento:', nombre, error);
     await sb.from('Documentos').delete().eq('id', id);
     cargarDocumentos();
   }
