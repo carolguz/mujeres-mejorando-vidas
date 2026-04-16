@@ -307,8 +307,10 @@
   }
 
   window.addEventListener('load', async () => {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) mostrarPanel();
+    // Siempre cerrar sesión al abrir la página para pedir login
+    await sb.auth.signOut();
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('admin-panel').style.display = 'none';
   });
 
   function cambiarTab(tab, el) {
@@ -425,29 +427,35 @@
   async function borrarNoticia(id) {
     if (!confirm('¿Seguro que quieres borrar esta noticia? También se eliminarán todas sus fotos.')) return;
 
-    const { data: noticia } = await sb.from('Noticias').select('imagen_url, imagenes_urls').eq('id', id).single();
+    try {
+      // 1. Obtener las URLs de las fotos
+      const { data: noticia } = await sb.from('Noticias').select('imagen_url, imagenes_urls').eq('id', id).single();
 
-    if (noticia) {
-      let fotos = [];
-      if (noticia.imagenes_urls) {
-        try { fotos = JSON.parse(noticia.imagenes_urls); } catch(e) {}
-      }
-      if (fotos.length === 0 && noticia.imagen_url) fotos = [noticia.imagen_url];
+      if (noticia) {
+        let fotos = [];
+        if (noticia.imagenes_urls) {
+          try { fotos = JSON.parse(noticia.imagenes_urls); } catch(e) {}
+        }
+        if (fotos.length === 0 && noticia.imagen_url) fotos = [noticia.imagen_url];
 
-      for (const url of fotos) {
-        // Extraer el nombre del archivo desde la URL de Supabase
-        // La URL tiene formato: .../storage/v1/object/public/Noticias/NOMBRE_ARCHIVO
-        const partes = url.split('/Noticias/');
-        if (partes.length > 1) {
-          const nombre = decodeURIComponent(partes[1].split('?')[0]);
-          const { error } = await sb.storage.from('Noticias').remove([nombre]);
-          if (error) console.error('Error borrando foto:', nombre, error);
+        // 2. Eliminar cada foto del Storage
+        for (const url of fotos) {
+          const path = url.split('/public/Noticias/')[1];
+          if (path) {
+            const { error: storageError } = await sb.storage.from('Noticias').remove([path]);
+            if (storageError) console.error('Error eliminando foto:', storageError);
+          }
         }
       }
-    }
 
-    await sb.from('Noticias').delete().eq('id', id);
-    cargarNoticias();
+      // 3. Eliminar registro de la base de datos
+      const { error: dbError } = await sb.from('Noticias').delete().eq('id', id);
+      if (dbError) console.error('Error eliminando noticia:', dbError);
+
+      cargarNoticias();
+    } catch(err) {
+      console.error(err);
+    }
   }
 
   // ─── DOCUMENTOS ───
@@ -551,15 +559,23 @@
 
   async function borrarDocumento(id, url) {
     if (!confirm('¿Seguro que quieres borrar este documento?')) return;
-    // Extraer nombre desde URL de Supabase: .../Documentos/NOMBRE_ARCHIVO
-    const partes = url.split('/Documentos/');
-    if (partes.length > 1) {
-      const nombre = decodeURIComponent(partes[1].split('?')[0]);
-      const { error } = await sb.storage.from('Documentos').remove([nombre]);
-      if (error) console.error('Error borrando documento:', nombre, error);
+
+    try {
+      // 1. Extraer path del archivo
+      const path = url.split('/public/Documentos/')[1];
+      if (path) {
+        const { error: storageError } = await sb.storage.from('Documentos').remove([path]);
+        if (storageError) console.error('Error eliminando documento:', storageError);
+      }
+
+      // 2. Eliminar registro de la base de datos
+      const { error: dbError } = await sb.from('Documentos').delete().eq('id', id);
+      if (dbError) console.error('Error eliminando registro:', dbError);
+
+      cargarDocumentos();
+    } catch(err) {
+      console.error(err);
     }
-    await sb.from('Documentos').delete().eq('id', id);
-    cargarDocumentos();
   }
 </script>
 
