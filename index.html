@@ -42,8 +42,8 @@
     }
     .nav-logo { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; flex-shrink: 0; }
     .nav-logo-text { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--amarillo); line-height: 1.2; white-space: nowrap; }
-    .nav-links { display: flex; gap: 1rem; list-style: none; flex-wrap: nowrap; align-items: center; flex-shrink: 1; }
-    .nav-links a, .nav-links button { color: var(--blanco); text-decoration: none; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.03em; transition: color 0.2s; cursor: pointer; white-space: nowrap; background: none; border: none; font-family: 'Nunito', sans-serif; padding: 0; }
+    .nav-links { display: flex; gap: 0.7rem; list-style: none; flex-wrap: nowrap; align-items: center; flex-shrink: 1; }
+    .nav-links a, .nav-links button { color: var(--blanco); text-decoration: none; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.02em; transition: color 0.2s; cursor: pointer; white-space: nowrap; background: none; border: none; font-family: 'Nunito', sans-serif; padding: 0; }
     .nav-links a:hover, .nav-links a.activo,
     .nav-links button:hover, .nav-links button.activo { color: var(--amarillo); }
 
@@ -220,7 +220,6 @@
     <li><button onclick="mostrarSeccion('noticias')" id="nav-noticias">Noticias</button></li>
     <li><button onclick="mostrarSeccion('contacto')" id="nav-contacto">Contacto</button></li>
     <li><button onclick="mostrarSeccion('donaciones')" id="nav-donaciones">💛 Apóyanos</button></li>
-    <li><button onclick="mostrarSeccion('visitas')" id="nav-visitas">Visitas</button></li>
   </ul>
 </nav>
 
@@ -242,10 +241,10 @@
       trabajando por el empoderamiento de mujeres, niñas, niños y adolescentes.
     </p>
     <div class="hero-badges">
-      <span class="badge">Empoderamiento</span>
-      <span class="badge">Derechos Humanos</span>
-      <span class="badge">Apoyo Comunitario</span>
-      <span class="badge">Transparencia</span>
+      <span class="badge">🌻 Empoderamiento</span>
+      <span class="badge">🤝 Atención Integral</span>
+      <span class="badge">🏘️ Apoyo Comunitario</span>
+      <span class="badge">📋 Transparencia</span>
     </div>
   </div>
 </section>
@@ -452,34 +451,6 @@
   </section>
 </div>
 
-<!-- ═══ VISITAS ═══ -->
-<div class="seccion-dinamica" id="sec-visitas">
-  <section style="background:var(--gris-claro); min-height:60vh; display:flex; align-items:center;">
-    <div class="container" style="text-align:center;">
-      <div class="section-title" style="margin-bottom:0.5rem;">Visitas a la Página</div>
-      <div class="section-line" style="margin:0 auto 2.5rem;"></div>
-      <div style="display:inline-flex; gap:2rem; flex-wrap:wrap; justify-content:center;">
-        <div style="background:var(--blanco); border-radius:20px; padding:2.5rem 3rem; box-shadow:0 4px 24px rgba(0,0,0,0.08); border-top:4px solid var(--naranja); min-width:200px;">
-          <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:#aaa; margin-bottom:0.8rem;">Visitas hoy</div>
-          <div style="font-family:'Playfair Display',serif; font-size:3rem; font-weight:900; color:var(--naranja); line-height:1;" id="visitas-hoy">—</div>
-          <div style="font-size:0.8rem; color:#bbb; margin-top:0.5rem;">personas hoy</div>
-        </div>
-        <div style="background:var(--blanco); border-radius:20px; padding:2.5rem 3rem; box-shadow:0 4px 24px rgba(0,0,0,0.08); border-top:4px solid var(--rojo); min-width:200px;">
-          <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:#aaa; margin-bottom:0.8rem;">Visitas totales</div>
-          <div style="font-family:'Playfair Display',serif; font-size:3rem; font-weight:900; color:var(--rojo); line-height:1;" id="visitas-total">—</div>
-          <div style="font-size:0.8rem; color:#bbb; margin-top:0.5rem;">desde el inicio</div>
-        </div>
-      </div>
-      <p style="color:#aaa; font-size:0.85rem; margin-top:2rem;">
-        Contador actualizado en tiempo real · <strong>Mejorando Vidas ONG</strong>
-      </p>
-      <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fcarolguz.github.io%2Fmujeres-mejorando-vidas&count_bg=%23e67e22&title_bg=%23555&title=visitas&edge_flat=true"
-           id="hits-badge" alt="" style="display:none;"
-           onload="parsearVisitas(this.src)"/>
-    </div>
-  </section>
-</div>
-
 <!-- ═══ DONACIONES ═══ -->
 <div class="seccion-dinamica" id="sec-donaciones">
   <section style="background:var(--gris-claro);flex:1;">
@@ -609,6 +580,9 @@
   <p class="footer-lema">Forjando Mejores Destinos</p>
   <p>© 2025 <span>Mujeres Mejorando Vidas – Zaragoza Heredia ONG</span>. Todos los derechos reservados.</p>
   <p style="margin-top:0.4rem;">Información pública de oficio conforme al <span>Artículo 10</span> de la Ley de Acceso a la Información Pública de Guatemala.</p>
+  <p style="margin-top:0.6rem; font-size:0.78rem; opacity:0.5;">
+    👁️ <span id="visitas-hoy">—</span> visitas hoy &nbsp;·&nbsp; <span id="visitas-total">—</span> totales
+  </p>
 </footer>
 
 <!-- EmailJS — para enviar documentos por correo -->
@@ -1010,21 +984,46 @@
     }
   }
 
-  function cargarVisitas() {
-    fetch('https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fcarolguz.github.io%2Fmujeres-mejorando-vidas&count_bg=%23e67e22&title_bg=%23555&title=visitas&edge_flat=true')
-      .then(r => r.text())
-      .then(svg => {
-        const nums = [...svg.matchAll(/>(\d+)<\/text>/g)].map(m => m[1]);
-        if (nums.length >= 2) {
-          document.getElementById('visitas-hoy').textContent   = nums[nums.length - 2];
-          document.getElementById('visitas-total').textContent = nums[nums.length - 1];
-        }
-      })
-      .catch(() => {});
+  // ─── VISITAS ───
+  async function registrarVisita() {
+    try {
+      const hoy = new Date().toISOString().split('T')[0];
+      await fetch(`${SUPABASE_URL}/rest/v1/visitas`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ fecha: hoy, cantidad: 1 })
+      });
+      cargarVisitas();
+    } catch(e) {}
+  }
+
+  async function cargarVisitas() {
+    try {
+      const hoy = new Date().toISOString().split('T')[0];
+      const [resHoy, resTotal] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/visitas?fecha=eq.${hoy}&select=cantidad`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        }),
+        fetch(`${SUPABASE_URL}/rest/v1/visitas?select=cantidad`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        })
+      ]);
+      const [hoyData, totalData] = await Promise.all([resHoy.json(), resTotal.json()]);
+      const totalHoy    = Array.isArray(hoyData)  ? hoyData.reduce((s,r)  => s+(r.cantidad||0), 0) : 0;
+      const totalGlobal = Array.isArray(totalData) ? totalData.reduce((s,r) => s+(r.cantidad||0), 0) : 0;
+      document.getElementById('visitas-hoy').textContent   = totalHoy.toLocaleString();
+      document.getElementById('visitas-total').textContent = totalGlobal.toLocaleString();
+    } catch(e) {}
   }
 
   window.addEventListener('load', () => {
     cargarNoticiasPublicas();
+    registrarVisita();
   });
 </script>
 
