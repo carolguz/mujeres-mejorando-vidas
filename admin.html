@@ -271,31 +271,31 @@
   };
 
   // ─── LOGIN ───
-  const CORREOS_AUTORIZADOS = [
-    'asocmejorandovidas@gmail.com',
-    'recursoshumanosmejorandovidas@gmail.com'
-  ];
+  // Usuarios autorizados con sus contraseñas
+  const USUARIOS = {
+    'asocmejorandovidas@gmail.com':          'mejorandovidas2026',
+    'recursoshumanosmejorandovidas@gmail.com': 'mujeresmvong2026*'
+  };
 
   async function iniciarSesion() {
     const email = document.getElementById('login-email').value.trim().toLowerCase();
     const pass  = document.getElementById('login-pass').value;
     document.getElementById('login-error').textContent = '';
 
-    if (!CORREOS_AUTORIZADOS.includes(email)) {
+    if (!USUARIOS[email]) {
       document.getElementById('login-error').textContent = 'No tienes permisos para acceder a este panel.';
       return;
     }
 
-    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-    if (error) {
+    if (USUARIOS[email] !== pass) {
       document.getElementById('login-error').textContent = 'Correo o contraseña incorrectos.';
-    } else {
-      mostrarPanel();
+      return;
     }
+
+    mostrarPanel();
   }
 
-  async function cerrarSesion() {
-    await sb.auth.signOut();
+  function cerrarSesion() {
     document.getElementById('admin-panel').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
   }
@@ -307,8 +307,7 @@
     cargarDocumentos();
   }
 
-  window.addEventListener('load', async () => {
-    await sb.auth.signOut();
+  window.addEventListener('load', () => {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('admin-panel').style.display = 'none';
   });
