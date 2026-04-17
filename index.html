@@ -986,15 +986,18 @@
 
   // ─── VISITAS ───
   async function registrarVisita() {
+    // Si ya se contó en esta sesión, no volver a contar
+    if (sessionStorage.getItem('visita_registrada')) {
+      cargarVisitas();
+      return;
+    }
     try {
       const hoy = new Date().toISOString().split('T')[0];
-      // 1. Ver si ya existe fila de hoy
       const res = await fetch(`${SUPABASE_URL}/rest/v1/visitas?fecha=eq.${hoy}&select=cantidad`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       });
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        // Ya existe → incrementar
         const actual = data[0].cantidad || 0;
         await fetch(`${SUPABASE_URL}/rest/v1/visitas?fecha=eq.${hoy}`, {
           method: 'PATCH',
@@ -1006,7 +1009,6 @@
           body: JSON.stringify({ cantidad: actual + 1 })
         });
       } else {
-        // No existe → insertar con cantidad 1
         await fetch(`${SUPABASE_URL}/rest/v1/visitas`, {
           method: 'POST',
           headers: {
@@ -1017,6 +1019,8 @@
           body: JSON.stringify({ fecha: hoy, cantidad: 1 })
         });
       }
+      // Marcar que ya se contó en esta sesión
+      sessionStorage.setItem('visita_registrada', '1');
       cargarVisitas();
     } catch(e) {}
   }
