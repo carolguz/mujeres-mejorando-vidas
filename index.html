@@ -988,16 +988,35 @@
   async function registrarVisita() {
     try {
       const hoy = new Date().toISOString().split('T')[0];
-      await fetch(`${SUPABASE_URL}/rest/v1/visitas`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates'
-        },
-        body: JSON.stringify({ fecha: hoy, cantidad: 1 })
+      // 1. Ver si ya existe fila de hoy
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/visitas?fecha=eq.${hoy}&select=cantidad`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       });
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        // Ya existe → incrementar
+        const actual = data[0].cantidad || 0;
+        await fetch(`${SUPABASE_URL}/rest/v1/visitas?fecha=eq.${hoy}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ cantidad: actual + 1 })
+        });
+      } else {
+        // No existe → insertar con cantidad 1
+        await fetch(`${SUPABASE_URL}/rest/v1/visitas`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ fecha: hoy, cantidad: 1 })
+        });
+      }
       cargarVisitas();
     } catch(e) {}
   }
