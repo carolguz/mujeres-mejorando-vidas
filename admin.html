@@ -316,12 +316,8 @@
   }
 
   window.addEventListener('load', async () => {
-    // Verificar si ya hay sesion activa
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      mostrarPanel();
-      return;
-    }
+    // Siempre cerrar sesion al cargar para forzar login
+    await sb.auth.signOut();
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('admin-panel').style.display = 'none';
   });
