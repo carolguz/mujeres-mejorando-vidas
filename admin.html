@@ -194,6 +194,7 @@
       Los cambios se ven en la página web apenas presiones <strong>Guardar cambios</strong>.
     </p>
     <div id="form-sedes"><p class="loading">Cargando información de contacto...</p></div>
+    <button class="btn-publicar" type="button" onclick="agregarSede()" id="btn-agregar-sede" style="margin-right:0.6rem;margin-bottom:0.7rem;">➕ Agregar nueva sede</button>
     <button class="btn-publicar" onclick="guardarContacto()" id="btn-guardar-contacto">💾 Guardar cambios</button>
     <p class="success-msg" id="contacto-ok"></p>
     <p class="error-msg2" id="contacto-error"></p>
@@ -633,17 +634,8 @@
     return String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  async function cargarContacto() {
-    const cont = document.getElementById('form-sedes');
-    let datos = CONTACTO_DEFAULT;
-    const { data, error } = await sb.from('Contacto').select('datos').eq('id', 1).maybeSingle();
-    if (error) {
-      cont.innerHTML = `<p class="error-msg2">❌ No se pudo cargar la información de contacto: ${escAttr(error.message)}</p>`;
-      return;
-    }
-    if (data && data.datos && Array.isArray(data.datos.sedes)) datos = data.datos;
-
-    cont.innerHTML = datos.sedes.map((s, i) => `
+  function htmlFormularioSede(s, i) {
+    return `
       <div class="card">
         <h2>${i === 0 ? '🏢' : '🏠'} Sede ${i + 1}</h2>
         <div class="form-group"><label>Nombre de la sede (título)</label>
@@ -663,7 +655,35 @@
         <div class="form-group"><label>🕐 Horario (una línea por día o rango)</label>
           <textarea id="sede${i}-horario" style="min-height:70px;">${escAttr(s.horario)}</textarea></div>
       </div>
-    `).join('');
+    `;
+  }
+
+  // Añade otro formulario con los mismos campos y estilos, sin perder lo ya escrito.
+  function agregarSede() {
+    const cont = document.getElementById('form-sedes');
+    const total = Number.parseInt(cont.dataset.total || '0', 10);
+    const errEl = document.getElementById('contacto-error');
+    const okEl = document.getElementById('contacto-ok');
+    if (!total) { errEl.textContent = 'Primero espera a que cargue la información.'; return; }
+    errEl.textContent = '';
+    okEl.textContent = '';
+    const nueva = { titulo: '', direccion: '', referencia: '', correo: '', telefonos: '', tag24: false, horario: '' };
+    cont.insertAdjacentHTML('beforeend', htmlFormularioSede(nueva, total));
+    cont.dataset.total = String(total + 1);
+    document.getElementById(`sede${total}-titulo`).focus();
+  }
+
+  async function cargarContacto() {
+    const cont = document.getElementById('form-sedes');
+    let datos = CONTACTO_DEFAULT;
+    const { data, error } = await sb.from('Contacto').select('datos').eq('id', 1).maybeSingle();
+    if (error) {
+      cont.innerHTML = `<p class="error-msg2">❌ No se pudo cargar la información de contacto: ${escAttr(error.message)}</p>`;
+      return;
+    }
+    if (data && data.datos && Array.isArray(data.datos.sedes)) datos = data.datos;
+
+    cont.innerHTML = datos.sedes.map((s, i) => htmlFormularioSede(s, i)).join('');
     cont.dataset.total = datos.sedes.length;
   }
 
