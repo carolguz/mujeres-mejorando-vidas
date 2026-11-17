@@ -184,6 +184,19 @@
   <div class="tabs">
     <div class="tab activo" onclick="cambiarTab('noticias', this)">📰 Noticias</div>
     <div class="tab" onclick="cambiarTab('transparencia', this)">📁 Transparencia</div>
+    <div class="tab" onclick="cambiarTab('contacto', this)">📍 Contacto</div>
+  </div>
+
+  <!-- TAB CONTACTO -->
+  <div class="tab-content" id="tab-contacto">
+    <p style="font-size:0.85rem;color:#888;margin-bottom:1.5rem;">
+      Aquí puedes cambiar la dirección, teléfonos, correo y horario de cada sede.
+      Los cambios se ven en la página web apenas presiones <strong>Guardar cambios</strong>.
+    </p>
+    <div id="form-sedes"><p class="loading">Cargando información de contacto...</p></div>
+    <button class="btn-publicar" onclick="guardarContacto()" id="btn-guardar-contacto">💾 Guardar cambios</button>
+    <p class="success-msg" id="contacto-ok"></p>
+    <p class="error-msg2" id="contacto-error"></p>
   </div>
 
   <!-- TAB NOTICIAS -->
@@ -313,6 +326,7 @@
     document.getElementById('admin-panel').style.display = 'block';
     cargarNoticias();
     cargarDocumentos();
+    cargarContacto();
   }
 
   window.addEventListener('load', async () => {
@@ -588,6 +602,109 @@
 
   function toggleSeccion(id) {
     document.getElementById(id).classList.toggle('abierto');
+  }
+
+  // ─── CONTACTO (sedes, teléfonos, horarios) ───
+  // Valores iniciales: lo que la página muestra hoy. Se usan si aún no se ha guardado nada.
+  const CONTACTO_DEFAULT = {
+    sedes: [
+      {
+        titulo: '🏢 Sede Central — Zaragoza',
+        direccion: '3ra. Calle 1-50 Zona 2, Zaragoza, Chimaltenango',
+        referencia: 'A la vuelta del supermercado "La Bodegona", frente al Colegio Heredia Kids.',
+        correo: 'asocmejorandovidas@gmail.com',
+        telefonos: '7830-5880\n4203-3655',
+        tag24: true,
+        horario: 'Lunes a Jueves: 8:30 AM – 4:30 PM\nViernes: 8:30 AM – 4:00 PM'
+      },
+      {
+        titulo: '🏠 Sub Sede — San Juan Comalapa',
+        direccion: '0 Calle A 0-38 Zona 3, San Juan Comalapa, Chimaltenango',
+        referencia: 'A media cuadra del parque.',
+        correo: 'tscomalapamejorandovidas@gmail.com',
+        telefonos: '5864-3977',
+        tag24: true,
+        horario: 'Lunes a Jueves: 8:30 AM – 4:30 PM\nViernes: 8:30 AM – 4:00 PM'
+      }
+    ]
+  };
+
+  function escAttr(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function cargarContacto() {
+    const cont = document.getElementById('form-sedes');
+    let datos = CONTACTO_DEFAULT;
+    const { data, error } = await sb.from('Contacto').select('datos').eq('id', 1).maybeSingle();
+    if (error) {
+      cont.innerHTML = `<p class="error-msg2">❌ No se pudo cargar la información de contacto: ${escAttr(error.message)}</p>`;
+      return;
+    }
+    if (data && data.datos && Array.isArray(data.datos.sedes)) datos = data.datos;
+
+    cont.innerHTML = datos.sedes.map((s, i) => `
+      <div class="card">
+        <h2>${i === 0 ? '🏢' : '🏠'} Sede ${i + 1}</h2>
+        <div class="form-group"><label>Nombre de la sede (título)</label>
+          <input type="text" id="sede${i}-titulo" value="${escAttr(s.titulo)}"/></div>
+        <div class="form-group"><label>📍 Dirección</label>
+          <input type="text" id="sede${i}-direccion" value="${escAttr(s.direccion)}"/>
+          <p style="font-size:0.75rem;color:#aaa;margin-top:0.3rem;">Los botones de Google Maps y Waze se crean solos con esta dirección.</p></div>
+        <div class="form-group"><label>Referencia (cómo llegar)</label>
+          <input type="text" id="sede${i}-referencia" value="${escAttr(s.referencia)}"/></div>
+        <div class="form-group"><label>✉️ Correo</label>
+          <input type="email" id="sede${i}-correo" value="${escAttr(s.correo)}"/></div>
+        <div class="form-group"><label>📞 Teléfonos (uno por línea)</label>
+          <textarea id="sede${i}-telefonos" style="min-height:70px;">${escAttr(s.telefonos)}</textarea></div>
+        <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="checkbox" id="sede${i}-tag24" style="width:auto;" ${s.tag24 ? 'checked' : ''}/>
+          <label for="sede${i}-tag24" style="margin:0;">Mostrar etiqueta "📱 24 horas" junto al último teléfono</label></div>
+        <div class="form-group"><label>🕐 Horario (una línea por día o rango)</label>
+          <textarea id="sede${i}-horario" style="min-height:70px;">${escAttr(s.horario)}</textarea></div>
+      </div>
+    `).join('');
+    cont.dataset.total = datos.sedes.length;
+  }
+
+  async function guardarContacto() {
+    const okEl = document.getElementById('contacto-ok');
+    const errEl = document.getElementById('contacto-error');
+    const btn = document.getElementById('btn-guardar-contacto');
+    okEl.textContent = ''; errEl.textContent = '';
+
+    const total = parseInt(document.getElementById('form-sedes').dataset.total || '0', 10);
+    if (!total) { errEl.textContent = 'Primero espera a que cargue la información.'; return; }
+
+    const val = (id) => document.getElementById(id).value.trim();
+    const sedes = [];
+    for (let i = 0; i < total; i++) {
+      const s = {
+        titulo: val(`sede${i}-titulo`),
+        direccion: val(`sede${i}-direccion`),
+        referencia: val(`sede${i}-referencia`),
+        correo: val(`sede${i}-correo`),
+        telefonos: val(`sede${i}-telefonos`),
+        tag24: document.getElementById(`sede${i}-tag24`).checked,
+        horario: val(`sede${i}-horario`)
+      };
+      if (!s.titulo || !s.direccion) {
+        errEl.textContent = `La sede ${i + 1} necesita al menos nombre y dirección.`;
+        return;
+      }
+      sedes.push(s);
+    }
+
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    const { error } = await sb.from('Contacto').upsert({ id: 1, datos: { sedes }, updated_at: new Date().toISOString() });
+    btn.disabled = false; btn.textContent = '💾 Guardar cambios';
+
+    if (error) {
+      errEl.textContent = '❌ Error al guardar: ' + error.message;
+      console.error('Supabase error (Contacto upsert):', error);
+    } else {
+      okEl.textContent = '✅ Información de contacto actualizada. Ya se ve en la página web.';
+    }
   }
 
   // ─── BORRAR DOCUMENTO (con borrado en cascada corregido) ───

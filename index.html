@@ -410,7 +410,7 @@
     <div class="container">
       <div class="section-title">Contacto</div>
       <div class="section-line" style="background:linear-gradient(90deg,var(--rojo),var(--naranja));"></div>
-      <div class="contacto-grid">
+      <div class="contacto-grid" id="contacto-grid">
         <div class="sede-card">
           <h3>🏢 Sede Central — Zaragoza</h3>
           <ul class="sede-info">
@@ -418,7 +418,7 @@
               <span class="sede-icon">📍</span>
               <span>
                 3ra. Calle 1-50 Zona 2, Zaragoza, Chimaltenango<br/>
-                <em style="color:rgba(255,255,255,0.5);font-size:0.85rem;">A la vuelta del supermercado "La Bodegona", frente al Colegio Heredia Kids.</em><br/>
+                <em style="color:#999;font-size:0.85rem;">A la vuelta del supermercado "La Bodegona", frente al Colegio Heredia Kids.</em><br/>
                 <div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap;">
                   <a href="https://www.google.com/maps/search/3ra.+Calle+1-50+Zona+2+Zaragoza+Chimaltenango+Guatemala" target="_blank" style="display:inline-flex;align-items:center;gap:0.3rem;background:#4285F4;color:white;padding:0.3rem 0.8rem;border-radius:6px;font-size:0.78rem;font-weight:700;text-decoration:none;"><img src="https://maps.google.com/mapfiles/ms/icons/blue-dot.png" style="width:14px;height:14px;object-fit:contain;" onerror="this.outerHTML='🗺️'"/> Google Maps</a>
                   <a href="https://waze.com/ul?q=3ra+Calle+1-50+Zona+2+Zaragoza+Chimaltenango+Guatemala" target="_blank" style="display:inline-flex;align-items:center;gap:0.3rem;background:#33ccff;color:#1a1a1a;padding:0.3rem 0.8rem;border-radius:6px;font-size:0.78rem;font-weight:700;text-decoration:none;"><img src="https://www.waze.com/favicon.ico" style="width:14px;height:14px;object-fit:contain;" onerror="this.outerHTML='🚗'"/> Waze</a>
@@ -437,7 +437,7 @@
               <span class="sede-icon">📍</span>
               <span>
                 0 Calle A 0-38 Zona 3, San Juan Comalapa, Chimaltenango<br/>
-                <em style="color:rgba(255,255,255,0.5);font-size:0.85rem;">A media cuadra del parque.</em><br/>
+                <em style="color:#999;font-size:0.85rem;">A media cuadra del parque.</em><br/>
                 <div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap;">
                   <a href="https://www.google.com/maps/search/San+Juan+Comalapa+Chimaltenango+Guatemala" target="_blank" style="display:inline-flex;align-items:center;gap:0.3rem;background:#4285F4;color:white;padding:0.3rem 0.8rem;border-radius:6px;font-size:0.78rem;font-weight:700;text-decoration:none;"><img src="https://maps.google.com/mapfiles/ms/icons/blue-dot.png" style="width:14px;height:14px;object-fit:contain;" onerror="this.outerHTML='🗺️'"/> Google Maps</a>
                   <a href="https://waze.com/ul?q=San+Juan+Comalapa+Chimaltenango+Guatemala" target="_blank" style="display:inline-flex;align-items:center;gap:0.3rem;background:#33ccff;color:#1a1a1a;padding:0.3rem 0.8rem;border-radius:6px;font-size:0.78rem;font-weight:700;text-decoration:none;"><img src="https://www.waze.com/favicon.ico" style="width:14px;height:14px;object-fit:contain;" onerror="this.outerHTML='🚗'"/> Waze</a>
@@ -599,6 +599,58 @@
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxb2VjZWdoa3J0a2hvYXhpZ3R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMTMxOTUsImV4cCI6MjA5MTY4OTE5NX0.r81_8qiedNQDRXYG015eZxpEYXZjjA1hor6AFPLXuSc';
 
   emailjs.init(EMAILJS_PUBLIC_KEY);
+
+  // ─── CONTACTO (editable desde el panel admin) ───
+  // Si no hay datos guardados o falla la conexión, se queda el contenido fijo del HTML.
+  function escHtml(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  async function cargarContactoPublico() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/Contacto?select=datos&id=eq.1`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Cache-Control': 'no-cache' }
+      });
+      if (!res.ok) return;
+      const filas = await res.json();
+      const sedes = filas?.[0]?.datos?.sedes;
+      if (!Array.isArray(sedes) || sedes.length === 0) return;
+
+      const btn = 'display:inline-flex;align-items:center;gap:0.3rem;padding:0.3rem 0.8rem;border-radius:6px;font-size:0.78rem;font-weight:700;text-decoration:none;';
+      document.getElementById('contacto-grid').innerHTML = sedes.map(s => {
+        const q = encodeURIComponent(`${s.direccion}, Guatemala`);
+        const tels = String(s.telefonos || '').split('\n').map(t => t.trim()).filter(Boolean);
+        const telsHtml = tels.map((t, i) => {
+          const tag = (s.tag24 && i === tels.length - 1) ? ' <span class="horario-tag">📱 24 horas</span>' : '';
+          return `<a href="tel:${t.replace(/[^\d+]/g, '')}">${escHtml(t)}</a>${tag}`;
+        }).join('<br/>');
+        const horario = String(s.horario || '').split('\n').map(escHtml).join('<br/>');
+        return `
+          <div class="sede-card">
+            <h3>${escHtml(s.titulo)}</h3>
+            <ul class="sede-info">
+              <li>
+                <span class="sede-icon">📍</span>
+                <span>
+                  ${escHtml(s.direccion)}<br/>
+                  ${s.referencia ? `<em style="color:#999;font-size:0.85rem;">${escHtml(s.referencia)}</em><br/>` : ''}
+                  <div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap;">
+                    <a href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" style="${btn}background:#4285F4;color:white;"><img src="https://maps.google.com/mapfiles/ms/icons/blue-dot.png" style="width:14px;height:14px;object-fit:contain;" onerror="this.outerHTML='🗺️'"/> Google Maps</a>
+                    <a href="https://waze.com/ul?q=${q}" target="_blank" style="${btn}background:#33ccff;color:#1a1a1a;"><img src="https://www.waze.com/favicon.ico" style="width:14px;height:14px;object-fit:contain;" onerror="this.outerHTML='🚗'"/> Waze</a>
+                  </div>
+                </span>
+              </li>
+              ${s.correo ? `<li><span class="sede-icon">✉️</span><span style="color:var(--naranja);">${escHtml(s.correo)}</span></li>` : ''}
+              ${telsHtml ? `<li><span class="sede-icon">📞</span><span>${telsHtml}</span></li>` : ''}
+              ${horario ? `<li><span class="sede-icon">🕐</span><span>${horario}</span></li>` : ''}
+            </ul>
+          </div>`;
+      }).join('');
+    } catch (e) {
+      console.warn('No se pudo cargar contacto dinámico:', e);
+    }
+  }
+  cargarContactoPublico();
 
   // ─── NAVEGACIÓN ───
   function mostrarSeccion(id) {
